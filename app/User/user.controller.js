@@ -12,7 +12,6 @@ class UserController {
 
   async createNewUser(req, res) {
     let { role, userName, password } = req.body
-
     const isUserNameExist = await this.UserService.isUserNameExist(userName)
     if (isUserNameExist)
       throw new ErrorHandler({
@@ -26,7 +25,6 @@ class UserController {
       userName,
       password: await bcrypt.hashPassword(password),
     })
-
     return ResponseHandler.send({
       res,
       httpCode: 200,
@@ -37,51 +35,36 @@ class UserController {
 
   async signIn(req, res) {
     let { userName, password } = req.body
-    const foundedUser = await this.UserService.findPasswordByUserName(userName)
-    console.log({ foundedUserA: foundedUser.accessToken })
+    const foundedUser = await this.UserService.findUserByUserName(userName)
     if (!foundedUser)
       throw new ErrorHandler({
         httpCode: 400,
         statusCode: statusCodes.USER_NAME_NOT_FOUND,
       })
     let accessToken
-    let refreshToken = foundedUser.dataValues?.refreshToken
     const comparePassword = await bcrypt.comparePassword({ password, hashPassword: foundedUser.password })
-    console.log({ comparePassword, accessToken: foundedUser.dataValues?.accessToken.length })
-    if (comparePassword && foundedUser.dataValues?.accessToken.length > 0) {
-      for (const i in foundedUser.dataValues.accessToken) {
-        console.log({ accessToken: foundedUser.dataValues.accessToken[i] })
-        console.log({ tokenVerify: await this.jwt.tokenVerify(foundedUser.dataValues.accessToken[i]) })
-        if ((await this.jwt.tokenVerify(foundedUser.dataValues.accessToken[i])) === "expire") {
+    if (comparePassword && foundedUser.accessToken.length > 0) {
+      for (const i in foundedUser.accessToken) {
+        if ((await this.jwt.tokenVerify(foundedUser.accessToken[i])) === "expire") {
           await this.UserService.pullAccessToken({
-            userName: foundedUser.dataValues.userName,
-            accessToken: foundedUser.dataValues.accessToken[i],
+            userId: foundedUser._id,
+            accessToken: foundedUser.accessToken[i],
           })
         }
       }
-
-      accessToken = await this.jwt.tokenGenerator({
-        role: foundedUser.dataValues.role,
-        userName: foundedUser.dataValues.userName,
-        expire: process.env.ACCESS_TOKEN_EXPIRE_TIME,
-      })
-      console.log({ accessToken })
-      if ((await this.jwt.tokenVerify(refreshToken)) === "expire") {
-        refreshToken = await this.jwt.tokenGenerator({
-          role: foundedUser.dataValues.role,
-          userName: foundedUser.dataValues.userName,
-          expire: process.env.REFRESH_TOKEN_EXPIRE_TIME,
-        })
-      }
     }
-    await this.UserService.pushAccessToken({ userName: foundedUser.dataValues.userName, accessToken })
-    await this.UserService.updateRefreshToken({ userName: foundedUser.dataValues.userName, refreshToken })
+    accessToken = await this.jwt.tokenGenerator({
+      role: foundedUser.role,
+      _id: foundedUser._id,
+      userName: foundedUser.userName,
+      expire: process.env.ACCESS_TOKEN_EXPIRE_TIME,
+    })
+    await this.UserService.pushAccessToken({ userId: foundedUser._id, accessToken })
     return ResponseHandler.send({
       res,
       httpCode: 200,
       statusCode: statusCodes.SUCCESS_RESPONSE,
       result: {
-        refreshToken,
         accessToken,
       },
     })

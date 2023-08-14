@@ -1,11 +1,11 @@
 const express = require("express")
+const mongoose = require("mongoose")
 const morgan = require("morgan")
 const v1 = require("./Routes/v1")
 const cors = require("cors")
 
 const { ErrorHandler } = require("./Handler")
 const values = require("./values")
-const sequelize = require("./sequelizeConfig") // Import your Sequelize configuration
 const app = express()
 
 app.use(morgan("dev"))
@@ -27,22 +27,26 @@ app.use((err, req, res, next) => {
   }
 })
 
-sequelize
-  .authenticate()
-
-  .then(() => {
-    console.log("Connected to PostgreSQL database")
+const MONGOOSE_USR = process.env.MONGOOSE_USR
+const MONGOOSE_AUTH_USR = process.env.MONGOOSE_AUTH_USR
+const MONGOOSE_PWD = process.env.MONGOOSE_PWD
+const MONGOOSE_PORT = process.env.MONGOOSE_PORT
+const MONGOOSE_IP = process.env.MONGOOSE_IP
+const MONGOOSE_DATABASE_NAME = process.env.MONGOOSE_DATABASE_NAME
+const MONGOOSE_CONNECTION_URL = `mongodb://
+${MONGOOSE_USR}:
+${encodeURIComponent(MONGOOSE_PWD)}@${MONGOOSE_IP}:${MONGOOSE_PORT}/${MONGOOSE_DATABASE_NAME}`
+const MONGOOSE_CONFIG = {
+  useNewUrlParser: true,
+  authSource: MONGOOSE_AUTH_USR,
+  useUnifiedTopology: true,
+}
+mongoose
+  .connect(MONGOOSE_CONNECTION_URL, MONGOOSE_CONFIG)
+  .then(async (result) => {
+    console.log("CONNECTED")
   })
   .catch((err) => {
-    console.error("Unable to connect to the database:", err)
+    console.log({ MONGO_ERROR: err })
   })
-sequelize
-  .sync({ force: false })
-  .then(() => {
-    console.log("Database synchronized")
-  })
-  .catch((err) => {
-    console.error("Error synchronizing database:", err)
-  })
-
 module.exports = app

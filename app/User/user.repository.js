@@ -1,57 +1,28 @@
-const User = require("./user.model") // Import your Sequelize User model
-const { Op, literal } = require("sequelize") // Import Op and literal from Sequelize
+const User = require("./user.model")
 
 class UserRepository {
-  async createNewUser({ role, userName, password }) {
-    return await User.create({
-      role,
-      userName,
-      password,
-    })
-  }
-
   async isUserNameExist(userName) {
-    return !!(await User.findOne({
-      where: { userName },
-    }))
+    return !!(await User.findOne({ userName }))
   }
 
-  async findPasswordByUserName(userName) {
-    return await User.findOne({
-      attributes: ["password", "role", "userName", "refreshToken", "accessToken"],
-      where: { userName },
-    })
+  async findUserById(id) {
+    return await User.findById(id).select("password role userName accessToken")
   }
 
   async findUserByUserName(userName) {
-    return (await User.findOne({ userName })).dataValues
+    return await User.findOne({ userName }).select("password role userName accessToken")
   }
 
-  async pullAccessToken({ userName, accessToken }) {
-    console.log({ pullAccessToken: { userName, accessToken } })
-    await User.update({ accessToken: literal(`array_remove("accessToken", '${accessToken}')`) }, { where: { userName }, returning: true })
-    return true
+  async createNewUser({ role, userName, password }) {
+    return await User({ role, userName, password }).save()
   }
 
-  async pushAccessToken({ userName, accessToken }) {
-    await User.update(
-      {
-        accessToken: literal(`array_append("accessToken", '${accessToken}')`),
-      },
-      { where: { userName }, returning: true }
-    )
-
-    return true
+  async pullAccessToken({ userId, accessToken }) {
+    return await User.findByIdAndUpdate(userId, { $pull: { accessToken } }, { new: true })
   }
 
-  async updateRefreshToken({ userName, refreshToken }) {
-    await User.update(
-      {
-        refreshToken: literal(`array_append("refreshToken", '${refreshToken}')`),
-      },
-      { where: { userName }, returning: true }
-    )
-    return true
+  async pushAccessToken({ userId, accessToken }) {
+    return await User.findByIdAndUpdate(userId, { $push: { accessToken } })
   }
 }
 

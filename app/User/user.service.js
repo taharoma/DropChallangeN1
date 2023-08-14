@@ -10,15 +10,13 @@ class UserService {
 
   createNewUser = async (arg) => await this.UserRepository.createNewUser(arg)
 
-  findPasswordByUserName = async (arg) => await this.UserRepository.findPasswordByUserName(arg)
+  findUserById = async (arg) => await this.UserRepository.findUserById(arg)
+
+  findUserByUserName = async (arg) => await this.UserRepository.findUserByUserName(arg)
 
   pullAccessToken = async (arg) => await this.UserRepository.pullAccessToken(arg)
 
-  updateRefreshToken = async (arg) => await this.UserRepository.updateRefreshToken(arg)
-
   pushAccessToken = async (arg) => await this.UserRepository.pushAccessToken(arg)
-
-  findUserByUserName = async (arg) => await this.UserRepository.findUserByUserName(arg)
 
   checkTokenValidity = async (accessToken) => {
     const decodeToken = jwt.tokenDeCode(accessToken)

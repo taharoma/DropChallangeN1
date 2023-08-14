@@ -2,9 +2,9 @@ const values = require("../values")
 const jwt = require("jsonwebtoken")
 
 class jwtService {
-  tokenGenerator = async ({ role, userName, expire }) => {
+  tokenGenerator = async ({ _id, role, userName, expire }) => {
     try {
-      const token = jwt.sign({ role, userName }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ _id, role, userName }, process.env.JWT_SECRET, {
         expiresIn: expire,
       })
       return token

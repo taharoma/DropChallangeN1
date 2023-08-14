@@ -1,53 +1,15 @@
-const { DataTypes } = require("sequelize")
-const sequelize = require("../sequelizeConfig")
+const mongoose = require("mongoose")
+const mongoosePaginate = require("mongoose-paginate-v2")
 
-const User = sequelize.define(
-  "User",
+const userSchema = new mongoose.Schema(
   {
-    role: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        isIn: [["ADMIN", "CLIENT"]],
-      },
-    },
-    userName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      primaryKey: true,
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    refreshToken: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      defaultValue: [],
-    },
-    accessToken: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      defaultValue: [],
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
-    },
+    role: { type: String, enum: ["CLIENT", "ADMIN"] },
+    userName: { type: String, trim: true },
+    password: { type: String, select: false },
+    accessToken: [{ type: String, select: false }],
   },
-  {
-    tableName: "users",
-    indexes: [
-      {
-        unique: true,
-        fields: ["userName"],
-      },
-    ],
-  }
+  { timestamps: true }
 )
 
-module.exports = User
+userSchema.plugin(mongoosePaginate)
+module.exports = mongoose.model("User", userSchema)
