@@ -1,0 +1,13 @@
+# dependencies
+node_modules
+package-lock.json
+
+# editors
+/.idea
+/.vscode
+
+# logs 
+logs
+
+# dotenv
+.env
