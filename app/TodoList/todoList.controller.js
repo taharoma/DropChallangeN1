@@ -26,7 +26,15 @@ class TodoListController {
 
   async updateToDoStatus(req, res) {
     let { toDoId, status } = req.body
-    const createdTask = await this.TodoListService.updateToDoStatus({
+
+    const foundedToDo = await this.TodoListService.toDoFindById(toDoId)
+    if (!foundedToDo)
+      throw new ErrorHandler({
+        httpCode: 400,
+        statusCode: statusCodes.TO_DO_ID_NOT_FOUND,
+        message: "toDoId not found",
+      })
+    const result = await this.TodoListService.updateToDoStatus({
       toDoId,
       status,
     })
@@ -34,7 +42,7 @@ class TodoListController {
       res,
       httpCode: 201,
       statusCode: statusCodes.SUCCESS_RESPONSE,
-      result: createdTask,
+      result: result,
     })
   }
 

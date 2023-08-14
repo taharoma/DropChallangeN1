@@ -9,6 +9,8 @@ class TodoListService {
 
   find = async (arg) => await this.TodoListRepository.find(arg)
 
+  toDoFindById = async (arg) => await this.TodoListRepository.toDoFindById(arg)
+
   updateToDoStatus = async (arg) => await this.TodoListRepository.updateToDoStatus(arg)
 
   sort = async ({ sort, query }) => {

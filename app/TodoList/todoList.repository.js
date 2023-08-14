@@ -21,6 +21,9 @@ class TodoListRepository {
     )
   }
 
+  async toDoFindById(id) {
+    return await ToDoList.findById(id)
+  }
   async find({ query, sort, populate, page, limit = 10 }) {
     return page
       ? await ToDoList.paginate(query, { limit, page, lean: true, sort, populate })

@@ -9,7 +9,6 @@ class bcryptService {
   }
 
   comparePassword = async ({ password, hashPassword }) => {
-    console.log({ password, hashPassword })
     return bcrypt.compareSync(password, hashPassword)
   }
 }

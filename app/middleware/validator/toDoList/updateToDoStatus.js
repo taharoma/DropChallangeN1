@@ -3,12 +3,9 @@ const { statusCodes } = require("../../../values")
 
 const validate = (req, res, next) => {
   const schema = Joi.object({
-    role: Joi.string().valid("ADMIN", "CLIENT").required(),
-    userName: Joi.string().alphanum().min(3).max(30).required(),
-    password: Joi.string()
-      .min(8)
-      .max(30)
-      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,30}$/)
+    status: Joi.string().valid("OPEN", "CLOSED").required(),
+    toDoId: Joi.string()
+      .pattern(/^[0-9a-fA-F]{24}$/)
       .required(),
   })
   const { error } = schema.validate(req.body, { abortEarly: false })

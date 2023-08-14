@@ -40,26 +40,34 @@ class UserController {
       throw new ErrorHandler({
         httpCode: 400,
         statusCode: statusCodes.USER_NAME_NOT_FOUND,
+        message: "USER_NAME_NOT_FOUND",
       })
     let accessToken
     const comparePassword = await bcrypt.comparePassword({ password, hashPassword: foundedUser.password })
-    if (comparePassword && foundedUser.accessToken.length > 0) {
-      for (const i in foundedUser.accessToken) {
-        if ((await this.jwt.tokenVerify(foundedUser.accessToken[i])) === "expire") {
-          await this.UserService.pullAccessToken({
-            userId: foundedUser._id,
-            accessToken: foundedUser.accessToken[i],
-          })
+    if (comparePassword) {
+      if (foundedUser.accessToken.length > 0) {
+        for (const i in foundedUser.accessToken) {
+          if ((await this.jwt.tokenVerify(foundedUser.accessToken[i])) === "expire") {
+            await this.UserService.pullAccessToken({
+              userId: foundedUser._id,
+              accessToken: foundedUser.accessToken[i],
+            })
+          }
         }
       }
-    }
-    accessToken = await this.jwt.tokenGenerator({
-      role: foundedUser.role,
-      _id: foundedUser._id,
-      userName: foundedUser.userName,
-      expire: process.env.ACCESS_TOKEN_EXPIRE_TIME,
-    })
-    await this.UserService.pushAccessToken({ userId: foundedUser._id, accessToken })
+      accessToken = await this.jwt.tokenGenerator({
+        role: foundedUser.role,
+        _id: foundedUser._id,
+        userName: foundedUser.userName,
+        expire: process.env.ACCESS_TOKEN_EXPIRE_TIME,
+      })
+      await this.UserService.pushAccessToken({ userId: foundedUser._id, accessToken })
+    } else
+      throw new ErrorHandler({
+        httpCode: 400,
+        statusCode: statusCodes.password_IS_WRONG,
+        message: "password_IS_WRONG",
+      })
     return ResponseHandler.send({
       res,
       httpCode: 200,

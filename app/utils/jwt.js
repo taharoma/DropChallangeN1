@@ -24,9 +24,7 @@ class jwtService {
 
   tokenVerify = async (token) => {
     try {
-      console.log({ token, JWT_SECRET: process.env.JWT_SECRET })
       const data = jwt.verify(token, process.env.JWT_SECRET)
-      console.log({ data })
 
       return data
     } catch (e) {
