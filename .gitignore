@@ -1,12 +1,12 @@
-# dependencies
+# Dependencies
 node_modules
 package-lock.json
 
-# editors
-/.idea
-/.vscode
+# Editors
+.idea
+.vscode
 
-# logs 
+# Logs
 logs
 
 # dotenv
